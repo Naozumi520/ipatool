@@ -22,10 +22,14 @@ type SearchOutput struct {
 }
 
 func (t *appstore) Search(input SearchInput) (SearchOutput, error) {
+	/*
 	countryCode, err := countryCodeFromStoreFront(input.Account.StoreFront)
 	if err != nil {
 		return SearchOutput{}, fmt.Errorf("country code is invalid: %w", err)
 	}
+        */
+
+	countryCode := "HU"
 
 	request := t.searchRequest(input.Term, countryCode, input.Limit)
 
