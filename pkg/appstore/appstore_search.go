@@ -29,7 +29,7 @@ func (t *appstore) Search(input SearchInput) (SearchOutput, error) {
 	}
         */
 
-	countryCode := "HU"
+	countryCode := "HK"
 
 	request := t.searchRequest(input.Term, countryCode, input.Limit)
 
