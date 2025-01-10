@@ -19,10 +19,14 @@ type LookupOutput struct {
 }
 
 func (t *appstore) Lookup(input LookupInput) (LookupOutput, error) {
+	/*
 	countryCode, err := countryCodeFromStoreFront(input.Account.StoreFront)
 	if err != nil {
 		return LookupOutput{}, fmt.Errorf("failed to reoslve the country code: %w", err)
 	}
+        */
+
+	countryCode := "HU"
 
 	request := t.lookupRequest(input.BundleID, countryCode)
 
