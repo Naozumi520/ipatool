@@ -26,7 +26,7 @@ func (t *appstore) Lookup(input LookupInput) (LookupOutput, error) {
 	}
         */
 
-	countryCode := "HU"
+	countryCode := "HK"
 
 	request := t.lookupRequest(input.BundleID, countryCode)
 
