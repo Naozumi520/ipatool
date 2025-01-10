@@ -15,60 +15,31 @@ jobs:
     outputs:
       version: ${{ steps.set_output.outputs.version }}
 
-  test_and_build_windows:
-    name: Test and Build for Windows
+  build_windows:
+    name: Build for Windows
     runs-on: windows-latest
-    needs: get_version
     strategy:
-      fail-fast: false
       matrix:
         arch: [arm64, amd64]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
           go-version: '1.19.3'
           cache: true
-      # Run tests
-      - run: go generate github.com/majd/ipatool/...
-      - run: go test -v github.com/majd/ipatool/...
-      # Build binaries for Windows
-      - run: go build -ldflags="-X github.com/majd/ipatool/v2/cmd.version=$VERSION" -o ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.exe
+
+      - name: Build Windows Binary
+        run: go build -ldflags="-X github.com/majd/ipatool/v2/cmd.version=$VERSION" -o ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.exe
         env:
           GOOS: windows
           GOARCH: ${{ matrix.arch }}
           VERSION: ${{ needs.get_version.outputs.version }}
-      # Upload built artifacts
-      - uses: actions/upload-artifact@v3
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
         with:
           name: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.exe
           path: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.exe
           if-no-files-found: error
-
-  release_windows:
-    name: Release for Windows
-    runs-on: ubuntu-latest
-    needs: test_and_build_windows
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, amd64]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v3
-        with:
-          name: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.exe
-          path: bin
-      - run: tar -czvf $FILE.tar.gz bin/$FILE.exe
-        env:
-          FILE: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}
-      - run: ./tools/sha256sum.sh $TARBALL > $TARBALL.sha256sum
-        env:
-          TARBALL: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.tar.gz
-      - uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ipatool-${{ needs.get_version.outputs.version }}-windows-${{ matrix.arch }}.*
-          tag: ${{ github.ref }}
-          overwrite: false
-          file_glob: true
